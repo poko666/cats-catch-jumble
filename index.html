@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>英文單字拼拼樂 (小魚餵貓 + 魚逃跑)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 10px;
+      margin: 0;
+      background: #e0f7fa;
+    }
+    h1 { font-size: clamp(20px, 5vw, 32px); }
+
+    #game-container { max-width: 95vw; margin: 0 auto; }
+
+    #letters {
+      display: flex; flex-wrap: wrap; justify-content: center;
+      margin: 10px auto; gap: 10px;
+    }
+
+    .fish {
+      width: 60px; height: 40px;
+      background: #4fc3f7;
+      border-radius: 20px 20px 20px 20px;
+      position: relative;
+      font-size: 20px; font-weight: bold;
+      color: white; display: flex;
+      justify-content: center; align-items: center;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    .fish:hover { transform: scale(1.1); background: #29b6f6; }
+    .fish::before {
+      content: "";
+      position: absolute;
+      right: -15px; top: 8px;
+      border-style: solid;
+      border-width: 12px 0 12px 15px;
+      border-color: transparent transparent transparent #4fc3f7;
+    }
+
+    #cat {
+      margin: 20px auto;
+      width: 200px; height: 150px;
+      background: url('https://i.imgur.com/T7fh7eT.png') no-repeat center;
+      background-size: contain;
+      position: relative;
+    }
+
+    #answer {
+      position: absolute;
+      bottom: 20px; left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 5px;
+    }
+
+    .slot {
+      width: 40px; height: 40px;
+      border-bottom: 2px solid #555;
+      font-size: 24px;
+      text-align: center;
+      line-height: 40px;
+    }
+
+    .blank-slot {
+      width: 20px; height: 40px;
+    }
+
+    #progress { margin-top: 20px; font-size: 18px; }
+    button {
+      margin: 5px; padding: 8px 16px;
+      font-size: clamp(14px, 4vw, 18px);
+      border-radius: 6px; border: none;
+      background: #4caf50; color: white; cursor: pointer;
+    }
+    button:hover { background: #45a049; }
+    .delete-btn { background: #e53935; }
+    .delete-btn:hover { background: #c62828; }
+
+    textarea, input, select {
+      width: 90%; max-width: 400px;
+      margin: 5px auto; padding: 8px;
+      font-size: clamp(14px, 4vw, 16px);
+      border: 1px solid #ccc; border-radius: 5px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>英文單字拼拼樂 🐟→🐱</h1>
+  <div id="game-container">
+
+    <h3>建立新的單字清單</h3>
+    <textarea id="wordListInput" placeholder="輸入單字，用逗號分隔 (例如: APPLE,ICE CREAM)"></textarea>
+    <input type="text" id="listNameInput" placeholder="清單名稱">
+    <button onclick="createWordList()">建立清單</button>
+
+    <h3>選擇單字清單</h3>
+    <select id="wordListSelect"></select>
+    <div>
+      <button onclick="startGame()">開始遊戲</button>
+      <button onclick="giveHint()">提示</button>
+      <button onclick="clearAnswer()">清除答案</button>
+      <button class="delete-btn" onclick="deleteWordList()">刪除清單</button>
+    </div>
+
+    <div id="letters"></div>
+
+    <div id="cat">
+      <div id="answer"></div>
+    </div>
+
+    <div id="progress"></div>
+  </div>
+
+  <script>
+    let wordLists = {};
+    let words = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+
+    window.onload = function() {
+      let savedLists = localStorage.getItem("wordLists");
+      if (savedLists) {
+        wordLists = JSON.parse(savedLists);
+        updateSelectOptions();
+      }
+    }
+
+    function saveLists() { localStorage.setItem("wordLists", JSON.stringify(wordLists)); }
+
+    function createWordList() {
+      let rawWords = document.getElementById("wordListInput").value.trim();
+      let listName = document.getElementById("listNameInput").value.trim();
+      if (!rawWords || !listName) { alert("請輸入清單名稱與單字！"); return; }
+      let wordArray = rawWords.split(",").map(w => w.trim().toUpperCase()).filter(w => w.length > 0);
+      wordLists[listName] = wordArray;
+      updateSelectOptions(); saveLists();
+      alert(`已建立清單「${listName}」！`);
+    }
+
+    function deleteWordList() {
+      let select = document.getElementById("wordListSelect");
+      let chosenList = select.value;
+      if (!chosenList) { alert("請先選擇要刪除的清單！"); return; }
+      if (confirm(`確定刪除清單「${chosenList}」嗎？`)) {
+        delete wordLists[chosenList];
+        saveLists();
+        updateSelectOptions();
+        alert(`已刪除清單「${chosenList}」！`);
+      }
+    }
+
+    function updateSelectOptions() {
+      let select = document.getElementById("wordListSelect");
+      select.innerHTML = "";
+      for (let key in wordLists) {
+        let option = document.createElement("option");
+        option.value = key;
+        option.innerText = key;
+        select.appendChild(option);
+      }
+    }
+
+    function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
+
+    function startGame() {
+      let select = document.getElementById("wordListSelect");
+      let chosenList = select.value;
+      if (!chosenList || !wordLists[chosenList]) {
+        alert("請先建立並選擇單字清單！");
+        return;
+      }
+      words = shuffle([...wordLists[chosenList]]);
+      currentIndex = 0; correctCount = 0;
+      loadWord();
+    }
+
+    function loadWord() {
+      if (currentIndex >= words.length) {
+        document.getElementById("letters").innerHTML = "";
+        document.getElementById("answer").innerHTML = "";
+        document.getElementById("progress").innerText =
+          `遊戲結束！共答對 ${correctCount} / ${words.length}`;
+        return;
+      }
+
+      let word = words[currentIndex];
+      let letters = shuffle(word.replace(/ /g, "").split(""));
+
+      let lettersDiv = document.getElementById("letters");
+      lettersDiv.innerHTML = "";
+      letters.forEach(l => {
+        let fish = document.createElement("div");
+        fish.className = "fish";
+        fish.innerText = l;
+        fish.addEventListener("click", () => { feedCat(l, fish); });
+        lettersDiv.appendChild(fish);
+      });
+
+      let answerDiv = document.getElementById("answer");
+      answerDiv.innerHTML = "";
+      for (let i = 0; i < word.length; i++) {
+        if (word[i] === " ") {
+          let blank = document.createElement("div");
+          blank.className = "blank-slot";
+          blank.innerText = " ";
+          answerDiv.appendChild(blank);
+        } else {
+          let slot = document.createElement("div");
+          slot.className = "slot";
+          answerDiv.appendChild(slot);
+        }
+      }
+
+      speakWord(word);
+      updateProgress();
+    }
+
+    function feedCat(letter, fishEl) {
+      let slots = document.querySelectorAll("#answer .slot");
+      for (let slot of slots) {
+        if (slot.innerText === "") {
+          slot.innerText = letter;
+          fishEl.style.transition = "transform 0.8s ease";
+          fishEl.style.transform = "translateY(-100px) scale(0.1)";
+          setTimeout(() => { fishEl.style.visibility = "hidden"; }, 800);
+          break;
+        }
+      }
+      setTimeout(checkAnswer, 200);
+    }
+
+    function clearAnswer() {
+      let slots = document.querySelectorAll("#answer .slot");
+      slots.forEach(s => { s.innerText = ""; });
+      let fishes = document.querySelectorAll("#letters .fish");
+      fishes.forEach(f => { f.style.visibility = "visible"; f.style.transform = "none"; });
+    }
+
+    function speakWord(word) {
+      let utterance = new SpeechSynthesisUtterance(word);
+      utterance.lang = "en-US";
+      speechSynthesis.speak(utterance);
+    }
+
+    function giveHint() {
+      if (words.length > 0 && currentIndex < words.length) {
+        let word = words[currentIndex];
+        speakWord(word);
+      }
+    }
+
+    function fishEscape() {
+      let fishes = document.querySelectorAll("#letters .fish");
+      fishes.forEach(fish => {
+        if (fish.style.visibility !== "hidden") {
+          let dx = (Math.random() - 0.5) * 200;
+          let dy = (Math.random() - 0.5) * 200;
+          fish.style.transition = "transform 0.3s ease";
+          fish.style.transform = `translate(${dx}px, ${dy}px)`;
+          setTimeout(() => {
+            fish.style.transform = "translate(0,0)";
+          }, 300);
+        }
+      });
+    }
+
+    function checkAnswer() {
+      let slots = document.querySelectorAll("#answer .slot, #answer .blank-slot");
+      let attempt = Array.from(slots).map(s => s.innerText).join("");
+
+      if (attempt.replace(/ /g, "").length === words[currentIndex].replace(/ /g, "").length) {
+        if (attempt === words[currentIndex]) {
+          speakWord(words[currentIndex]);
+          alert("答對了！");
+          correctCount++;
+        } else {
+          alert("答錯了，小魚逃跑啦！");
+          fishEscape(); // ⚡ 觸發魚逃跑動畫
+        }
+        setTimeout(() => { currentIndex++; loadWord(); }, 1500);
+      }
+    }
+
+    function updateProgress() {
+      document.getElementById("progress").innerText =
+        `進度：${currentIndex + 1} / ${words.length}　已答對：${correctCount}`;
+    }
+  </script>
+</body>
+</html>
