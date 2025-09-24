@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>英文單字拼拼樂 (小魚餵貓 + 魚逃跑)</title>
+  <title>英文單字拼拼樂 (字母魚版)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -22,37 +22,27 @@
     }
 
     .fish {
-      width: 60px; height: 40px;
-      background: #4fc3f7;
-      border-radius: 20px 20px 20px 20px;
-      position: relative;
-      font-size: 20px; font-weight: bold;
-      color: white; display: flex;
-      justify-content: center; align-items: center;
+      width: 80px; height: 50px;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
       cursor: pointer;
+      user-select: none;
       transition: transform 0.3s;
     }
-    .fish:hover { transform: scale(1.1); background: #29b6f6; }
-    .fish::before {
-      content: "";
-      position: absolute;
-      right: -15px; top: 8px;
-      border-style: solid;
-      border-width: 12px 0 12px 15px;
-      border-color: transparent transparent transparent #4fc3f7;
-    }
+    .fish:hover { transform: scale(1.1); }
 
     #cat {
       margin: 20px auto;
-      width: 200px; height: 150px;
-      background: url('https://i.imgur.com/T7fh7eT.png') no-repeat center;
+      width: 220px; height: 220px;
+      background: url('cat.png') no-repeat center;
       background-size: contain;
       position: relative;
     }
 
     #answer {
       position: absolute;
-      bottom: 20px; left: 50%;
+      bottom: 35px; left: 50%;
       transform: translateX(-50%);
       display: flex;
       gap: 5px;
@@ -195,9 +185,16 @@
       let lettersDiv = document.getElementById("letters");
       lettersDiv.innerHTML = "";
       letters.forEach(l => {
-        let fish = document.createElement("div");
+        const fish = document.createElement("div");
         fish.className = "fish";
-        fish.innerText = l;
+        let imgName;
+        if (l === " ") {
+          imgName = "fish_blank.png";
+        } else {
+          imgName = `fish_${l}.png`;  // 假設所有字母都是 A-Z
+        }
+        fish.style.backgroundImage = `url('${imgName}')`;
+        fish.dataset.letter = l;
         fish.addEventListener("click", () => { feedCat(l, fish); });
         lettersDiv.appendChild(fish);
       });
@@ -281,7 +278,7 @@
           correctCount++;
         } else {
           alert("答錯了，小魚逃跑啦！");
-          fishEscape(); // ⚡ 觸發魚逃跑動畫
+          fishEscape();
         }
         setTimeout(() => { currentIndex++; loadWord(); }, 1500);
       }
