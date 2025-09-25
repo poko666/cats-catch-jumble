@@ -19,6 +19,8 @@
     #letters {
       display: flex; flex-wrap: wrap; justify-content: center;
       margin: 10px auto; gap: 10px;
+      position: relative;
+      z-index: 1000; /* 確保魚初始層級高 */
     }
 
     .fish {
@@ -28,8 +30,9 @@
       background-size: contain;
       cursor: pointer;
       user-select: none;
+      position: relative;
+      z-index: 999; /* 🐟 小魚永遠在貓咪頭上面 */
       transition: transform 0.3s;
-      position: absolute; /* 讓動畫座標移動更自然 */
     }
     .fish:hover { transform: scale(1.1); }
 
@@ -39,18 +42,20 @@
       background: url('images/cat.png') no-repeat center;
       background-size: contain;
       position: relative;
+      z-index: 10; /* 貓咪層級在魚之下 */
+      transition: transform 0.1s ease-in-out;
     }
 
-    /* 嘴巴容器 (裁切魚) */
+    /* 嘴巴容器 */
     #mouth {
       position: absolute;
-      bottom: 60px; /* 嘴巴位置可依圖片調整 */
+      bottom: 60px; /* 嘴巴位置需依圖片調整 */
       left: 50%;
       transform: translateX(-50%);
       width: 100px; height: 60px;
-      overflow: hidden; /* 魚進來後被裁掉 */
+      overflow: hidden;
       pointer-events: none;
-      z-index: 2;
+      z-index: 20; /* 嘴巴容器在最上層 */
     }
 
     /* 嘴巴咬合動畫 */
@@ -70,7 +75,7 @@
       transform: translateX(-50%);
       display: flex;
       gap: 5px;
-      z-index: 3; /* 確保字母格在最上層 */
+      z-index: 30; /* 答案文字在最上層 */
     }
 
     .slot {
@@ -221,9 +226,6 @@
         }
         fish.style.backgroundImage = `url('${imgName}')`;
         fish.dataset.letter = l;
-
-        // 初始位置：隨便擺在字母區
-        fish.style.position = "relative";
         fish.addEventListener("click", () => { feedCat(l, fish); });
         lettersDiv.appendChild(fish);
       });
@@ -268,6 +270,15 @@
           let dx = targetX - fishX;
           let dy = targetY - fishY;
 
+          // 讓魚在最上層游進嘴巴
+          fishEl.style.zIndex = "999";
+          fishEl.style.position = "fixed"; // 確保座標正確
+          fishEl.style.left = fishX - fishRect.width/2 + "px";
+          fishEl.style.top = fishY - fishRect.height/2 + "px";
+
+          // 強制重繪 (避免 transition 失效)
+          fishEl.offsetHeight;
+
           fishEl.style.transition = "transform 0.8s ease-in";
           fishEl.style.transform = `translate(${dx}px, ${dy}px) scale(0.1)`;
 
@@ -276,7 +287,7 @@
           cat.classList.add("cat-bite");
           setTimeout(() => { cat.classList.remove("cat-bite"); }, 300);
 
-          // 動畫後把魚放進嘴巴容器並隱藏
+          // 動畫後放進嘴巴並隱藏
           setTimeout(() => {
             mouth.appendChild(fishEl);
             fishEl.style.transition = "none";
