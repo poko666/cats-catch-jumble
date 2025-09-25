@@ -46,7 +46,6 @@
       transition: transform 0.1s ease-in-out;
     }
 
-    /* 嘴巴容器 */
     #mouth {
       position: absolute;
       bottom: 60px;
@@ -58,18 +57,14 @@
       z-index: 20;
     }
 
-    /* 嘴巴咬合動畫 */
-    .cat-bite {
-      animation: bite 0.3s ease-in-out;
-    }
+    .cat-bite { animation: bite 0.3s ease-in-out; }
     @keyframes bite {
-      0%   { transform: scaleY(1); }
-      30%  { transform: scaleY(0.8); }
-      60%  { transform: scaleY(1.1); }
+      0% { transform: scaleY(1); }
+      30% { transform: scaleY(0.8); }
+      60% { transform: scaleY(1.1); }
       100% { transform: scaleY(1); }
     }
 
-    /* ✅ 答題區 */
     #answer {
       position: relative;
       margin-top: 20px;
@@ -79,7 +74,6 @@
       z-index: 30;
     }
 
-    /* 白底卡片格子 */
     .slot {
       width: 40px; height: 40px;
       border-radius: 6px;
@@ -93,28 +87,20 @@
       box-shadow: 1px 1px 4px rgba(0,0,0,0.4);
     }
 
-    .blank-slot {
-      width: 20px; height: 40px;
-    }
+    .blank-slot { width: 20px; height: 40px; }
 
-    /* 🎨 答對閃綠光 */
-    .correct {
-      animation: flashGreen 0.6s ease;
-    }
+    .correct { animation: flashGreen 0.6s ease; }
     @keyframes flashGreen {
-      0%   { background: #fff; border-color: #333; box-shadow: none; }
-      50%  { background: #a5d6a7; border-color: #2e7d32; box-shadow: 0 0 10px #66bb6a; }
-      100% { background: #fff; border-color: #333; box-shadow: none; }
+      0% { background:#fff; border-color:#333; box-shadow:none; }
+      50% { background:#a5d6a7; border-color:#2e7d32; box-shadow:0 0 10px #66bb6a; }
+      100% { background:#fff; border-color:#333; box-shadow:none; }
     }
 
-    /* 🎨 答錯閃紅光 */
-    .wrong {
-      animation: flashRed 0.6s ease;
-    }
+    .wrong { animation: flashRed 0.6s ease; }
     @keyframes flashRed {
-      0%   { background: #fff; border-color: #333; box-shadow: none; }
-      50%  { background: #ef9a9a; border-color: #c62828; box-shadow: 0 0 10px #ef5350; }
-      100% { background: #fff; border-color: #333; box-shadow: none; }
+      0% { background:#fff; border-color:#333; box-shadow:none; }
+      50% { background:#ef9a9a; border-color:#c62828; box-shadow:0 0 10px #ef5350; }
+      100% { background:#fff; border-color:#333; box-shadow:none; }
     }
 
     #progress { margin-top: 20px; font-size: 18px; }
@@ -124,9 +110,9 @@
       border-radius: 6px; border: none;
       background: #4caf50; color: white; cursor: pointer;
     }
-    button:hover { background: #45a049; }
-    .delete-btn { background: #e53935; }
-    .delete-btn:hover { background: #c62828; }
+    button:hover { background:#45a049; }
+    .delete-btn { background:#e53935; }
+    .delete-btn:hover { background:#c62828; }
 
     textarea, input, select {
       width: 90%; max-width: 400px;
@@ -136,7 +122,6 @@
       display: block;
     }
 
-    /* 🎉 提示訊息框 */
     #message {
       position: fixed;
       top: 20px; left: 50%;
@@ -149,8 +134,8 @@
       display: none;
       z-index: 2000;
     }
-    #message.success { background: #4caf50; }
-    #message.error { background: #e53935; }
+    #message.success { background:#4caf50; }
+    #message.error { background:#e53935; }
   </style>
 </head>
 <body>
@@ -177,13 +162,10 @@
       <div id="mouth"></div>
     </div>
 
-    <!-- ✅ 答題區在貓咪下方 -->
     <div id="answer"></div>
-
     <div id="progress"></div>
   </div>
 
-  <!-- ✅ 提示訊息框 -->
   <div id="message"></div>
 
   <script>
@@ -192,237 +174,192 @@
     let currentIndex = 0;
     let correctCount = 0;
 
-    window.onload = function() {
+    window.onload = () => {
       let savedLists = localStorage.getItem("wordLists");
       if (savedLists) {
         wordLists = JSON.parse(savedLists);
         updateSelectOptions();
       }
-    }
+    };
 
-    function saveLists() { localStorage.setItem("wordLists", JSON.stringify(wordLists)); }
+    function saveLists(){ localStorage.setItem("wordLists", JSON.stringify(wordLists)); }
 
     function createWordList() {
       let rawWords = document.getElementById("wordListInput").value.trim();
       let listName = document.getElementById("listNameInput").value.trim();
-      if (!rawWords || !listName) { showMessage("請輸入清單名稱與單字！", "error"); return; }
-      let wordArray = rawWords.split(",").map(w => w.trim().toUpperCase()).filter(w => w.length > 0);
+      if (!rawWords || !listName){ showMessage("請輸入清單名稱與單字！","error"); return; }
+      let wordArray = rawWords.split(",").map(w=>w.trim().toUpperCase()).filter(w=>w.length>0);
       wordLists[listName] = wordArray;
       updateSelectOptions(); saveLists();
-      showMessage(`已建立清單「${listName}」！`, "success");
+      showMessage(`已建立清單「${listName}」！`,"success");
     }
 
-    function deleteWordList() {
+    function deleteWordList(){
       let select = document.getElementById("wordListSelect");
       let chosenList = select.value;
-      if (!chosenList) { showMessage("請先選擇要刪除的清單！", "error"); return; }
-      if (confirm(`確定刪除清單「${chosenList}」嗎？`)) {
-        delete wordLists[chosenList];
-        saveLists();
-        updateSelectOptions();
-        showMessage(`已刪除清單「${chosenList}」！`, "success");
+      if (!chosenList){ showMessage("請先選擇要刪除的清單！","error"); return; }
+      if (confirm(`確定刪除清單「${chosenList}」嗎？`)){
+        delete wordLists[chosenList]; saveLists(); updateSelectOptions();
+        showMessage(`已刪除清單「${chosenList}」！`,"success");
       }
     }
 
-    function updateSelectOptions() {
+    function updateSelectOptions(){
       let select = document.getElementById("wordListSelect");
       select.innerHTML = "";
-      for (let key in wordLists) {
+      for (let key in wordLists){
         let option = document.createElement("option");
-        option.value = key;
-        option.innerText = key;
+        option.value = key; option.innerText = key;
         select.appendChild(option);
       }
     }
 
-    function shuffle(array) { return array.sort(() => Math.random() - 0.5); }
+    function shuffle(array){ return array.sort(()=>Math.random()-0.5); }
 
-    function startGame() {
+    function startGame(){
       let select = document.getElementById("wordListSelect");
       let chosenList = select.value;
-      if (!chosenList || !wordLists[chosenList]) {
-        showMessage("請先建立並選擇單字清單！", "error");
-        return;
+      if (!chosenList || !wordLists[chosenList]){
+        showMessage("請先建立並選擇單字清單！","error"); return;
       }
       words = shuffle([...wordLists[chosenList]]);
       currentIndex = 0; correctCount = 0;
       loadWord();
     }
 
-    function loadWord() {
-      if (currentIndex >= words.length) {
-        document.getElementById("letters").innerHTML = "";
-        document.getElementById("answer").innerHTML = "";
-        document.getElementById("progress").innerText =
-          `遊戲結束！共答對 ${correctCount} / ${words.length}`;
+    function loadWord(){
+      if (currentIndex >= words.length){
+        document.getElementById("letters").innerHTML="";
+        document.getElementById("answer").innerHTML="";
+        document.getElementById("progress").innerText=`遊戲結束！共答對 ${correctCount} / ${words.length}`;
         return;
       }
-
       let word = words[currentIndex];
-      let letters = shuffle(word.replace(/ /g, "").split(""));
-
+      let letters = shuffle(word.replace(/ /g,"").split(""));
       let lettersDiv = document.getElementById("letters");
-      lettersDiv.innerHTML = "";
-      letters.forEach(l => {
+      lettersDiv.innerHTML="";
+      letters.forEach(l=>{
         const fish = document.createElement("div");
-        fish.className = "fish";
-        let imgName = l === " " ? "images/fish_blank.png" : `images/fish_${l}.png`;
-        fish.style.backgroundImage = `url('${imgName}')`;
-        fish.dataset.letter = l;
-        fish.addEventListener("click", () => { feedCat(l, fish); });
+        fish.className="fish";
+        let imgName = l===" " ? "images/fish_blank.png" : `images/fish_${l}.png`;
+        fish.style.backgroundImage=`url('${imgName}')`;
+        fish.dataset.letter=l;
+        fish.addEventListener("click",()=>{ feedCat(l,fish); });
         lettersDiv.appendChild(fish);
       });
-
-      let answerDiv = document.getElementById("answer");
-      answerDiv.innerHTML = "";
-      for (let i = 0; i < word.length; i++) {
-        if (word[i] === " ") {
-          let blank = document.createElement("div");
-          blank.className = "blank-slot";
-          blank.innerText = " ";
+      let answerDiv=document.getElementById("answer"); answerDiv.innerHTML="";
+      for (let i=0;i<word.length;i++){
+        if (word[i]===" "){
+          let blank=document.createElement("div"); blank.className="blank-slot"; blank.innerText=" ";
           answerDiv.appendChild(blank);
         } else {
-          let slot = document.createElement("div");
-          slot.className = "slot";
+          let slot=document.createElement("div"); slot.className="slot";
           answerDiv.appendChild(slot);
         }
       }
-
-      speakWord(word);
-      updateProgress();
+      speakWord(word); updateProgress();
     }
 
-    function feedCat(letter, fishEl) {
-      let slots = document.querySelectorAll("#answer .slot");
-      for (let slot of slots) {
-        if (slot.innerText === "") {
-          slot.innerText = letter;
-
-          // 嘴巴位置
-          let mouth = document.getElementById("mouth");
-          let mouthRect = mouth.getBoundingClientRect();
-          let targetX = mouthRect.left + mouthRect.width/2;
-          let targetY = mouthRect.top + mouthRect.height/2;
-
-          // 魚當前位置
-          let fishRect = fishEl.getBoundingClientRect();
-          let fishX = fishRect.left + fishRect.width/2;
-          let fishY = fishRect.top + fishRect.height/2;
-
-          // 移動量
-          let dx = targetX - fishX;
-          let dy = targetY - fishY;
-
-          fishEl.style.zIndex = "999";
-          fishEl.style.position = "fixed";
-          fishEl.style.left = fishX - fishRect.width/2 + "px";
-          fishEl.style.top = fishY - fishRect.height/2 + "px";
-
+    function feedCat(letter,fishEl){
+      let slots=document.querySelectorAll("#answer .slot");
+      for (let slot of slots){
+        if (slot.innerText===""){
+          slot.innerText=letter;
+          let mouth=document.getElementById("mouth");
+          let mouthRect=mouth.getBoundingClientRect();
+          let targetX=mouthRect.left+mouthRect.width/2;
+          let targetY=mouthRect.top+mouthRect.height/2;
+          let fishRect=fishEl.getBoundingClientRect();
+          let fishX=fishRect.left+fishRect.width/2;
+          let fishY=fishRect.top+fishRect.height/2;
+          let dx=targetX-fishX; let dy=targetY-fishY;
+          fishEl.style.zIndex="999"; fishEl.style.position="fixed";
+          fishEl.style.left=fishX-fishRect.width/2+"px";
+          fishEl.style.top=fishY-fishRect.height/2+"px";
           fishEl.offsetHeight;
-
-          fishEl.style.transition = "transform 0.8s ease-in";
-          fishEl.style.transform = `translate(${dx}px, ${dy}px) scale(0.1)`;
-
-          // 貓咪咬合
-          let cat = document.getElementById("cat");
+          fishEl.style.transition="transform 0.8s ease-in";
+          fishEl.style.transform=`translate(${dx}px, ${dy}px) scale(0.1)`;
+          let cat=document.getElementById("cat");
           cat.classList.add("cat-bite");
-          setTimeout(() => { cat.classList.remove("cat-bite"); }, 300);
-
-          // 動畫後放進嘴巴並隱藏
-          setTimeout(() => {
-            mouth.appendChild(fishEl);
-            fishEl.style.transition = "none";
-            fishEl.style.transform = "scale(0.1)";
-            fishEl.style.visibility = "hidden";
-          }, 800);
-
+          setTimeout(()=>{ cat.classList.remove("cat-bite"); },300);
+          // ✅ 不隱藏小魚，等待判斷答對再處理
+          setTimeout(()=>{ fishEl.style.transition="none"; fishEl.style.transform="scale(0.1)"; },800);
           break;
         }
       }
-      setTimeout(checkAnswer, 200);
+      setTimeout(checkAnswer,200);
     }
 
-    /* ✅ 答錯或手動清除時，把魚放回字母區 */
-    function clearAnswer() {
-      let slots = document.querySelectorAll("#answer .slot");
-      slots.forEach(s => { s.innerText = ""; });
-
-      let lettersDiv = document.getElementById("letters");
-      let fishes = document.querySelectorAll(".fish");
-
-      fishes.forEach(f => {
-        f.style.visibility = "visible";
-        f.style.transform = "none";
-        f.style.position = "relative"; // 回到原本布局
-        lettersDiv.appendChild(f);     // 放回字母區
+    function clearAnswer(){
+      let slots=document.querySelectorAll("#answer .slot");
+      slots.forEach(s=>{ s.innerText=""; });
+      let lettersDiv=document.getElementById("letters");
+      let fishes=document.querySelectorAll(".fish");
+      fishes.forEach(f=>{
+        f.style.visibility="visible";
+        f.style.transform="none";
+        f.style.position="relative";
+        lettersDiv.appendChild(f);
       });
     }
 
-    function speakWord(word) {
-      let utterance = new SpeechSynthesisUtterance(word);
-      utterance.lang = "en-US";
-      speechSynthesis.speak(utterance);
+    function speakWord(word){
+      let utterance=new SpeechSynthesisUtterance(word);
+      utterance.lang="en-US"; speechSynthesis.speak(utterance);
     }
 
-    function giveHint() {
-      if (words.length > 0 && currentIndex < words.length) {
-        let word = words[currentIndex];
-        speakWord(word);
+    function giveHint(){
+      if (words.length>0 && currentIndex<words.length){
+        speakWord(words[currentIndex]);
       }
     }
 
-    function fishEscape() {
-      let fishes = document.querySelectorAll("#letters .fish");
-      fishes.forEach(fish => {
-        if (fish.style.visibility !== "hidden") {
-          let dx = (Math.random() - 0.5) * 200;
-          let dy = (Math.random() - 0.5) * 200;
-          fish.style.transition = "transform 0.3s ease";
-          fish.style.transform = `translate(${dx}px, ${dy}px)`;
-          setTimeout(() => {
-            fish.style.transform = "translate(0,0)";
-          }, 300);
+    function fishEscape(){
+      let fishes=document.querySelectorAll("#letters .fish");
+      fishes.forEach(fish=>{
+        if (fish.style.visibility!=="hidden"){
+          let dx=(Math.random()-0.5)*200;
+          let dy=(Math.random()-0.5)*200;
+          fish.style.transition="transform 0.3s ease";
+          fish.style.transform=`translate(${dx}px,${dy}px)`;
+          setTimeout(()=>{ fish.style.transform="translate(0,0)"; },300);
         }
       });
     }
 
-    /* ✅ 修正版：只有答對才換題 */
-    function checkAnswer() {
-      let slots = document.querySelectorAll("#answer .slot, #answer .blank-slot");
-      let attempt = Array.from(slots).map(s => s.innerText).join("");
-
-      if (attempt.replace(/ /g, "").length === words[currentIndex].replace(/ /g, "").length) {
-        if (attempt === words[currentIndex]) {
-          // ✅ 答對
+    function checkAnswer(){
+      let slots=document.querySelectorAll("#answer .slot, #answer .blank-slot");
+      let attempt=Array.from(slots).map(s=>s.innerText).join("");
+      if (attempt.replace(/ /g,"").length===words[currentIndex].replace(/ /g,"").length){
+        if (attempt===words[currentIndex]){
+          // ✅ 答對才真正吞掉小魚
           speakWord(words[currentIndex]);
-          slots.forEach(s => s.classList.add("correct"));
-          setTimeout(() => { slots.forEach(s => s.classList.remove("correct")); }, 600);
-          showMessage("答對了！", "success");
+          slots.forEach(s=>s.classList.add("correct"));
+          setTimeout(()=>{ slots.forEach(s=>s.classList.remove("correct")); },600);
+          showMessage("答對了！","success");
           correctCount++;
-          setTimeout(() => { currentIndex++; loadWord(); }, 1500);
+          // 隱藏魚
+          document.querySelectorAll("#letters .fish").forEach(f=>{ f.style.visibility="hidden"; });
+          setTimeout(()=>{ currentIndex++; loadWord(); },1500);
         } else {
-          // ❌ 答錯 → 留在同一題
-          slots.forEach(s => s.classList.add("wrong"));
-          setTimeout(() => { slots.forEach(s => s.classList.remove("wrong")); }, 600);
-          showMessage("答錯了，請再試一次！", "error");
+          // ❌ 答錯
+          slots.forEach(s=>s.classList.add("wrong"));
+          setTimeout(()=>{ slots.forEach(s=>s.classList.remove("wrong")); },600);
+          showMessage("答錯了，請再試一次！","error");
           fishEscape();
-          setTimeout(clearAnswer, 1000);
+          setTimeout(clearAnswer,1000);
         }
       }
     }
 
-    function updateProgress() {
-      document.getElementById("progress").innerText =
-        `進度：${currentIndex + 1} / ${words.length}　已答對：${correctCount}`;
+    function updateProgress(){
+      document.getElementById("progress").innerText=`進度：${currentIndex+1} / ${words.length}　已答對：${correctCount}`;
     }
 
-    /* ✅ 顯示訊息 */
-    function showMessage(text, type) {
-      const msg = document.getElementById("message");
-      msg.innerText = text;
-      msg.className = type;
-      msg.style.display = "block";
-      setTimeout(() => { msg.style.display = "none"; }, 1500);
+    function showMessage(text,type){
+      const msg=document.getElementById("message");
+      msg.innerText=text; msg.className=type; msg.style.display="block";
+      setTimeout(()=>{ msg.style.display="none"; },1500);
     }
   </script>
 </body>
