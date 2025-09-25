@@ -228,16 +228,17 @@
     }
 
     function loadWord(){
+      // ✅ 清掉舊的小魚和答案格，避免殘留
+      document.getElementById("letters").innerHTML = "";
+      document.getElementById("answer").innerHTML = "";
+
       if (currentIndex >= words.length){
-        document.getElementById("letters").innerHTML="";
-        document.getElementById("answer").innerHTML="";
         document.getElementById("progress").innerText=`遊戲結束！共答對 ${correctCount} / ${words.length}`;
         return;
       }
       let word = words[currentIndex];
       let letters = shuffle(word.replace(/ /g,"").split(""));
       let lettersDiv = document.getElementById("letters");
-      lettersDiv.innerHTML="";
       letters.forEach(l=>{
         const fish = document.createElement("div");
         fish.className="fish";
@@ -247,7 +248,7 @@
         fish.addEventListener("click",()=>{ feedCat(l,fish); });
         lettersDiv.appendChild(fish);
       });
-      let answerDiv=document.getElementById("answer"); answerDiv.innerHTML="";
+      let answerDiv=document.getElementById("answer");
       for (let i=0;i<word.length;i++){
         if (word[i]===" "){
           let blank=document.createElement("div"); blank.className="blank-slot"; blank.innerText=" ";
@@ -278,28 +279,16 @@
           fishEl.style.top=fishY-fishRect.height/2+"px";
           fishEl.offsetHeight;
           fishEl.style.transition="transform 0.8s ease-in";
-          fishEl.style.transform=`translate(${dx}px, ${dy}px) scale(0.9)`; // 保持看得到
+          fishEl.style.transform=`translate(${dx}px, ${dy}px) scale(0.9)`;
           let cat=document.getElementById("cat");
           cat.classList.add("cat-bite");
           setTimeout(()=>{ cat.classList.remove("cat-bite"); },300);
-          setTimeout(()=>{ fishEl.style.transition="none"; },800);
+          // ✅ 動畫後復原 position，避免殘留
+          setTimeout(()=>{ fishEl.style.transition="none"; fishEl.style.position="relative"; },800);
           break;
         }
       }
       setTimeout(checkAnswer,200);
-    }
-
-    function clearAnswer(){
-      let slots=document.querySelectorAll("#answer .slot");
-      slots.forEach(s=>{ s.innerText=""; });
-      let lettersDiv=document.getElementById("letters");
-      let fishes=document.querySelectorAll(".fish");
-      fishes.forEach(f=>{
-        f.style.visibility="visible";
-        f.style.transform="none";
-        f.style.position="relative";
-        lettersDiv.appendChild(f);
-      });
     }
 
     function speakWord(word){
@@ -337,7 +326,6 @@
           setTimeout(()=>{ slots.forEach(s=>s.classList.remove("correct")); },600);
           showMessage("答對了！","success");
           correctCount++;
-          // ✅ 答對才讓魚縮小隱藏
           document.querySelectorAll("#letters .fish").forEach(f=>{
             f.style.transition="transform 0.5s ease";
             f.style.transform="scale(0.1)";
@@ -345,12 +333,12 @@
           });
           setTimeout(()=>{ currentIndex++; loadWord(); },1500);
         } else {
-          // ❌ 答錯
+          // ❌ 答錯 → 重新生成小魚
           slots.forEach(s=>s.classList.add("wrong"));
           setTimeout(()=>{ slots.forEach(s=>s.classList.remove("wrong")); },600);
           showMessage("答錯了，請再試一次！","error");
           fishEscape();
-          setTimeout(clearAnswer,1000);
+          setTimeout(()=>{ loadWord(); },1000);
         }
       }
     }
