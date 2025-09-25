@@ -91,7 +91,6 @@
       text-align: center;
       line-height: 40px;
       box-shadow: 1px 1px 4px rgba(0,0,0,0.4);
-      transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
     }
 
     .blank-slot {
@@ -100,16 +99,22 @@
 
     /* 🎨 答對閃綠光 */
     .correct {
-      background: #a5d6a7 !important;
-      border-color: #2e7d32 !important;
-      box-shadow: 0 0 10px #66bb6a;
+      animation: flashGreen 0.6s ease;
+    }
+    @keyframes flashGreen {
+      0%   { background: #fff; border-color: #333; box-shadow: none; }
+      50%  { background: #a5d6a7; border-color: #2e7d32; box-shadow: 0 0 10px #66bb6a; }
+      100% { background: #fff; border-color: #333; box-shadow: none; }
     }
 
     /* 🎨 答錯閃紅光 */
     .wrong {
-      background: #ef9a9a !important;
-      border-color: #c62828 !important;
-      box-shadow: 0 0 10px #ef5350;
+      animation: flashRed 0.6s ease;
+    }
+    @keyframes flashRed {
+      0%   { background: #fff; border-color: #333; box-shadow: none; }
+      50%  { background: #ef9a9a; border-color: #c62828; box-shadow: 0 0 10px #ef5350; }
+      100% { background: #fff; border-color: #333; box-shadow: none; }
     }
 
     #progress { margin-top: 20px; font-size: 18px; }
