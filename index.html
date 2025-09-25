@@ -386,24 +386,27 @@
       });
     }
 
+    /* ✅ 修正版：只有答對才換題 */
     function checkAnswer() {
       let slots = document.querySelectorAll("#answer .slot, #answer .blank-slot");
       let attempt = Array.from(slots).map(s => s.innerText).join("");
 
       if (attempt.replace(/ /g, "").length === words[currentIndex].replace(/ /g, "").length) {
         if (attempt === words[currentIndex]) {
+          // ✅ 答對
           speakWord(words[currentIndex]);
           slots.forEach(s => s.classList.add("correct"));
           setTimeout(() => { slots.forEach(s => s.classList.remove("correct")); }, 600);
           showMessage("答對了！", "success");
           correctCount++;
-          setTimeout(() => { currentIndex++; loadWord(); }, 1500); // ✅ 答對才換題
+          setTimeout(() => { currentIndex++; loadWord(); }, 1500);
         } else {
+          // ❌ 答錯 → 留在同一題
           slots.forEach(s => s.classList.add("wrong"));
           setTimeout(() => { slots.forEach(s => s.classList.remove("wrong")); }, 600);
           showMessage("答錯了，請再試一次！", "error");
           fishEscape();
-          setTimeout(clearAnswer, 1000); // ❌ 答錯時：清空答案並讓魚回來
+          setTimeout(clearAnswer, 1000);
         }
       }
     }
