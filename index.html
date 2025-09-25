@@ -342,11 +342,20 @@
       setTimeout(checkAnswer, 200);
     }
 
+    /* ✅ 答錯或手動清除時，把魚放回字母區 */
     function clearAnswer() {
       let slots = document.querySelectorAll("#answer .slot");
       slots.forEach(s => { s.innerText = ""; });
-      let fishes = document.querySelectorAll("#letters .fish");
-      fishes.forEach(f => { f.style.visibility = "visible"; f.style.transform = "none"; });
+
+      let lettersDiv = document.getElementById("letters");
+      let fishes = document.querySelectorAll(".fish");
+
+      fishes.forEach(f => {
+        f.style.visibility = "visible";
+        f.style.transform = "none";
+        f.style.position = "relative"; // 回到原本布局
+        lettersDiv.appendChild(f);     // 放回字母區
+      });
     }
 
     function speakWord(word) {
@@ -394,7 +403,7 @@
           setTimeout(() => { slots.forEach(s => s.classList.remove("wrong")); }, 600);
           showMessage("答錯了，請再試一次！", "error");
           fishEscape();
-          setTimeout(clearAnswer, 1000); // ❌ 答錯自動清空，繼續練習
+          setTimeout(clearAnswer, 1000); // ❌ 答錯時：清空答案並讓魚回來
         }
       }
     }
