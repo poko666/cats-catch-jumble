@@ -205,7 +205,7 @@
     function createWordList() {
       let rawWords = document.getElementById("wordListInput").value.trim();
       let listName = document.getElementById("listNameInput").value.trim();
-      if (!rawWords || !listName) { alert("請輸入清單名稱與單字！"); return; }
+      if (!rawWords || !listName) { showMessage("請輸入清單名稱與單字！", "error"); return; }
       let wordArray = rawWords.split(",").map(w => w.trim().toUpperCase()).filter(w => w.length > 0);
       wordLists[listName] = wordArray;
       updateSelectOptions(); saveLists();
@@ -266,12 +266,7 @@
       letters.forEach(l => {
         const fish = document.createElement("div");
         fish.className = "fish";
-        let imgName;
-        if (l === " ") {
-          imgName = "images/fish_blank.png";
-        } else {
-          imgName = `images/fish_${l}.png`;
-        }
+        let imgName = l === " " ? "images/fish_blank.png" : `images/fish_${l}.png`;
         fish.style.backgroundImage = `url('${imgName}')`;
         fish.dataset.letter = l;
         fish.addEventListener("click", () => { feedCat(l, fish); });
@@ -393,13 +388,14 @@
           setTimeout(() => { slots.forEach(s => s.classList.remove("correct")); }, 600);
           showMessage("答對了！", "success");
           correctCount++;
+          setTimeout(() => { currentIndex++; loadWord(); }, 1500); // ✅ 答對才換題
         } else {
           slots.forEach(s => s.classList.add("wrong"));
           setTimeout(() => { slots.forEach(s => s.classList.remove("wrong")); }, 600);
-          showMessage("答錯了，小魚逃跑啦！", "error");
+          showMessage("答錯了，請再試一次！", "error");
           fishEscape();
+          setTimeout(clearAnswer, 1000); // ❌ 答錯自動清空，繼續練習
         }
-        setTimeout(() => { currentIndex++; loadWord(); }, 1500);
       }
     }
 
