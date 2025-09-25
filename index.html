@@ -31,7 +31,7 @@
       cursor: pointer;
       user-select: none;
       position: relative;
-      z-index: 999; /* 🐟 永遠在貓咪頭上面 */
+      z-index: 999;
       transition: transform 0.3s;
     }
     .fish:hover { transform: scale(1.1); }
@@ -69,7 +69,7 @@
       100% { transform: scaleY(1); }
     }
 
-    /* ✅ 答題區放在貓咪下方 */
+    /* ✅ 答題區 */
     #answer {
       position: relative;
       margin-top: 20px;
@@ -79,7 +79,7 @@
       z-index: 30;
     }
 
-    /* 白底卡片風格 */
+    /* 白底卡片格子 */
     .slot {
       width: 40px; height: 40px;
       border-radius: 6px;
@@ -91,10 +91,25 @@
       text-align: center;
       line-height: 40px;
       box-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+      transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
     }
 
     .blank-slot {
       width: 20px; height: 40px;
+    }
+
+    /* 🎨 答對閃綠光 */
+    .correct {
+      background: #a5d6a7 !important;
+      border-color: #2e7d32 !important;
+      box-shadow: 0 0 10px #66bb6a;
+    }
+
+    /* 🎨 答錯閃紅光 */
+    .wrong {
+      background: #ef9a9a !important;
+      border-color: #c62828 !important;
+      box-shadow: 0 0 10px #ef5350;
     }
 
     #progress { margin-top: 20px; font-size: 18px; }
@@ -141,7 +156,7 @@
       <div id="mouth"></div>
     </div>
 
-    <!-- ✅ 答題區放到貓咪下方 -->
+    <!-- ✅ 答題區在貓咪下方 -->
     <div id="answer"></div>
 
     <div id="progress"></div>
@@ -284,12 +299,12 @@
           fishEl.style.left = fishX - fishRect.width/2 + "px";
           fishEl.style.top = fishY - fishRect.height/2 + "px";
 
-          fishEl.offsetHeight; // 強制重繪
+          fishEl.offsetHeight;
 
           fishEl.style.transition = "transform 0.8s ease-in";
           fishEl.style.transform = `translate(${dx}px, ${dy}px) scale(0.1)`;
 
-          // 貓咪咬合動畫
+          // 貓咪咬合
           let cat = document.getElementById("cat");
           cat.classList.add("cat-bite");
           setTimeout(() => { cat.classList.remove("cat-bite"); }, 300);
@@ -350,9 +365,13 @@
       if (attempt.replace(/ /g, "").length === words[currentIndex].replace(/ /g, "").length) {
         if (attempt === words[currentIndex]) {
           speakWord(words[currentIndex]);
+          slots.forEach(s => s.classList.add("correct"));
+          setTimeout(() => { slots.forEach(s => s.classList.remove("correct")); }, 600);
           alert("答對了！");
           correctCount++;
         } else {
+          slots.forEach(s => s.classList.add("wrong"));
+          setTimeout(() => { slots.forEach(s => s.classList.remove("wrong")); }, 600);
           alert("答錯了，小魚逃跑啦！");
           fishEscape();
         }
