@@ -29,7 +29,7 @@
       cursor: pointer;
       user-select: none;
       transition: transform 0.3s;
-      position: absolute; /* 方便移動 */
+      position: absolute; /* 讓動畫座標移動更自然 */
     }
     .fish:hover { transform: scale(1.1); }
 
@@ -39,21 +39,21 @@
       background: url('images/cat.png') no-repeat center;
       background-size: contain;
       position: relative;
-      transition: transform 0.1s ease-in-out;
     }
 
-    /* 嘴巴區域 (魚游進來會被裁掉) */
+    /* 嘴巴容器 (裁切魚) */
     #mouth {
       position: absolute;
-      bottom: 60px;
+      bottom: 60px; /* 嘴巴位置可依圖片調整 */
       left: 50%;
       transform: translateX(-50%);
       width: 100px; height: 60px;
-      overflow: hidden;
+      overflow: hidden; /* 魚進來後被裁掉 */
       pointer-events: none;
+      z-index: 2;
     }
 
-    /* 😺 嘴巴咬合動畫 */
+    /* 嘴巴咬合動畫 */
     .cat-bite {
       animation: bite 0.3s ease-in-out;
     }
@@ -70,6 +70,7 @@
       transform: translateX(-50%);
       display: flex;
       gap: 5px;
+      z-index: 3; /* 確保字母格在最上層 */
     }
 
     .slot {
@@ -212,12 +213,17 @@
       letters.forEach(l => {
         const fish = document.createElement("div");
         fish.className = "fish";
-        fish.style.backgroundImage = `url('images/fish_${l}.png')`;
+        let imgName;
+        if (l === " ") {
+          imgName = "images/fish_blank.png";
+        } else {
+          imgName = `images/fish_${l}.png`;
+        }
+        fish.style.backgroundImage = `url('${imgName}')`;
         fish.dataset.letter = l;
 
-        // 初始放在 letters 區域
+        // 初始位置：隨便擺在字母區
         fish.style.position = "relative";
-
         fish.addEventListener("click", () => { feedCat(l, fish); });
         lettersDiv.appendChild(fish);
       });
@@ -247,32 +253,34 @@
         if (slot.innerText === "") {
           slot.innerText = letter;
 
-          // 🎯 算目標嘴巴位置
+          // 嘴巴位置
           let mouth = document.getElementById("mouth");
           let mouthRect = mouth.getBoundingClientRect();
-          let targetX = mouthRect.left + mouthRect.width / 2;
-          let targetY = mouthRect.top + mouthRect.height / 2;
+          let targetX = mouthRect.left + mouthRect.width/2;
+          let targetY = mouthRect.top + mouthRect.height/2;
 
-          // 🐟 算小魚位置
+          // 魚當前位置
           let fishRect = fishEl.getBoundingClientRect();
-          let fishX = fishRect.left + fishRect.width / 2;
-          let fishY = fishRect.top + fishRect.height / 2;
+          let fishX = fishRect.left + fishRect.width/2;
+          let fishY = fishRect.top + fishRect.height/2;
 
+          // 移動量
           let dx = targetX - fishX;
           let dy = targetY - fishY;
 
-          // 🏊‍♂️ 小魚游向嘴巴
           fishEl.style.transition = "transform 0.8s ease-in";
           fishEl.style.transform = `translate(${dx}px, ${dy}px) scale(0.1)`;
 
-          // 😺 嘴巴咬合動畫
+          // 貓咪咬合
           let cat = document.getElementById("cat");
           cat.classList.add("cat-bite");
           setTimeout(() => { cat.classList.remove("cat-bite"); }, 300);
 
-          // 游進去之後移到 mouth 裡並隱藏
+          // 動畫後把魚放進嘴巴容器並隱藏
           setTimeout(() => {
             mouth.appendChild(fishEl);
+            fishEl.style.transition = "none";
+            fishEl.style.transform = "scale(0.1)";
             fishEl.style.visibility = "hidden";
           }, 800);
 
