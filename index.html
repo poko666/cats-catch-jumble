@@ -20,7 +20,7 @@
       display: flex; flex-wrap: wrap; justify-content: center;
       margin: 10px auto; gap: 10px;
       position: relative;
-      z-index: 1000; /* 確保魚初始層級高 */
+      z-index: 1000;
     }
 
     .fish {
@@ -31,7 +31,7 @@
       cursor: pointer;
       user-select: none;
       position: relative;
-      z-index: 999; /* 🐟 小魚永遠在貓咪頭上面 */
+      z-index: 999; /* 🐟 永遠在貓咪頭上面 */
       transition: transform 0.3s;
     }
     .fish:hover { transform: scale(1.1); }
@@ -42,20 +42,20 @@
       background: url('images/cat.png') no-repeat center;
       background-size: contain;
       position: relative;
-      z-index: 10; /* 貓咪層級在魚之下 */
+      z-index: 10;
       transition: transform 0.1s ease-in-out;
     }
 
     /* 嘴巴容器 */
     #mouth {
       position: absolute;
-      bottom: 60px; /* 嘴巴位置需依圖片調整 */
+      bottom: 60px;
       left: 50%;
       transform: translateX(-50%);
       width: 100px; height: 60px;
       overflow: hidden;
       pointer-events: none;
-      z-index: 20; /* 嘴巴容器在最上層 */
+      z-index: 20;
     }
 
     /* 嘴巴咬合動畫 */
@@ -69,28 +69,29 @@
       100% { transform: scaleY(1); }
     }
 
+    /* ✅ 答題區放在貓咪下方 */
     #answer {
-      position: absolute;
-      bottom: 35px; left: 50%;
-      transform: translateX(-50%);
+      position: relative;
+      margin-top: 20px;
       display: flex;
+      justify-content: center;
       gap: 5px;
-      z-index: 30; /* 答案文字在最上層 */
+      z-index: 30;
     }
 
+    /* 白底卡片風格 */
     .slot {
       width: 40px; height: 40px;
       border-radius: 6px;
-      background: rgba(255, 255, 255, 0.8); /* 半透明白底 */
+      background: rgba(255, 255, 255, 0.9);
       border: 2px solid #333;
       font-size: 24px;
       font-weight: bold;
-      color: #000; /* 黑字，因為有白底才清楚 */
+      color: #000;
       text-align: center;
       line-height: 40px;
       box-shadow: 1px 1px 4px rgba(0,0,0,0.4);
     }
-
 
     .blank-slot {
       width: 20px; height: 40px;
@@ -138,8 +139,10 @@
 
     <div id="cat">
       <div id="mouth"></div>
-      <div id="answer"></div>
     </div>
+
+    <!-- ✅ 答題區放到貓咪下方 -->
+    <div id="answer"></div>
 
     <div id="progress"></div>
   </div>
@@ -276,19 +279,17 @@
           let dx = targetX - fishX;
           let dy = targetY - fishY;
 
-          // 讓魚在最上層游進嘴巴
           fishEl.style.zIndex = "999";
-          fishEl.style.position = "fixed"; // 確保座標正確
+          fishEl.style.position = "fixed";
           fishEl.style.left = fishX - fishRect.width/2 + "px";
           fishEl.style.top = fishY - fishRect.height/2 + "px";
 
-          // 強制重繪 (避免 transition 失效)
-          fishEl.offsetHeight;
+          fishEl.offsetHeight; // 強制重繪
 
           fishEl.style.transition = "transform 0.8s ease-in";
           fishEl.style.transform = `translate(${dx}px, ${dy}px) scale(0.1)`;
 
-          // 貓咪咬合
+          // 貓咪咬合動畫
           let cat = document.getElementById("cat");
           cat.classList.add("cat-bite");
           setTimeout(() => { cat.classList.remove("cat-bite"); }, 300);
