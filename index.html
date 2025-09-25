@@ -135,6 +135,22 @@
       border: 1px solid #ccc; border-radius: 5px;
       display: block;
     }
+
+    /* 🎉 提示訊息框 */
+    #message {
+      position: fixed;
+      top: 20px; left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      display: none;
+      z-index: 2000;
+    }
+    #message.success { background: #4caf50; }
+    #message.error { background: #e53935; }
   </style>
 </head>
 <body>
@@ -167,6 +183,9 @@
     <div id="progress"></div>
   </div>
 
+  <!-- ✅ 提示訊息框 -->
+  <div id="message"></div>
+
   <script>
     let wordLists = {};
     let words = [];
@@ -190,18 +209,18 @@
       let wordArray = rawWords.split(",").map(w => w.trim().toUpperCase()).filter(w => w.length > 0);
       wordLists[listName] = wordArray;
       updateSelectOptions(); saveLists();
-      alert(`已建立清單「${listName}」！`);
+      showMessage(`已建立清單「${listName}」！`, "success");
     }
 
     function deleteWordList() {
       let select = document.getElementById("wordListSelect");
       let chosenList = select.value;
-      if (!chosenList) { alert("請先選擇要刪除的清單！"); return; }
+      if (!chosenList) { showMessage("請先選擇要刪除的清單！", "error"); return; }
       if (confirm(`確定刪除清單「${chosenList}」嗎？`)) {
         delete wordLists[chosenList];
         saveLists();
         updateSelectOptions();
-        alert(`已刪除清單「${chosenList}」！`);
+        showMessage(`已刪除清單「${chosenList}」！`, "success");
       }
     }
 
@@ -222,7 +241,7 @@
       let select = document.getElementById("wordListSelect");
       let chosenList = select.value;
       if (!chosenList || !wordLists[chosenList]) {
-        alert("請先建立並選擇單字清單！");
+        showMessage("請先建立並選擇單字清單！", "error");
         return;
       }
       words = shuffle([...wordLists[chosenList]]);
@@ -372,12 +391,12 @@
           speakWord(words[currentIndex]);
           slots.forEach(s => s.classList.add("correct"));
           setTimeout(() => { slots.forEach(s => s.classList.remove("correct")); }, 600);
-          alert("答對了！");
+          showMessage("答對了！", "success");
           correctCount++;
         } else {
           slots.forEach(s => s.classList.add("wrong"));
           setTimeout(() => { slots.forEach(s => s.classList.remove("wrong")); }, 600);
-          alert("答錯了，小魚逃跑啦！");
+          showMessage("答錯了，小魚逃跑啦！", "error");
           fishEscape();
         }
         setTimeout(() => { currentIndex++; loadWord(); }, 1500);
@@ -387,6 +406,15 @@
     function updateProgress() {
       document.getElementById("progress").innerText =
         `進度：${currentIndex + 1} / ${words.length}　已答對：${correctCount}`;
+    }
+
+    /* ✅ 顯示訊息 */
+    function showMessage(text, type) {
+      const msg = document.getElementById("message");
+      msg.innerText = text;
+      msg.className = type;
+      msg.style.display = "block";
+      setTimeout(() => { msg.style.display = "none"; }, 1500);
     }
   </script>
 </body>
