@@ -80,11 +80,17 @@
 
     .slot {
       width: 40px; height: 40px;
-      border-bottom: 2px solid #555;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.8); /* 半透明白底 */
+      border: 2px solid #333;
       font-size: 24px;
+      font-weight: bold;
+      color: #000; /* 黑字，因為有白底才清楚 */
       text-align: center;
       line-height: 40px;
+      box-shadow: 1px 1px 4px rgba(0,0,0,0.4);
     }
+
 
     .blank-slot {
       width: 20px; height: 40px;
