@@ -278,12 +278,11 @@
           fishEl.style.top=fishY-fishRect.height/2+"px";
           fishEl.offsetHeight;
           fishEl.style.transition="transform 0.8s ease-in";
-          fishEl.style.transform=`translate(${dx}px, ${dy}px) scale(0.1)`;
+          fishEl.style.transform=`translate(${dx}px, ${dy}px) scale(0.9)`; // 保持看得到
           let cat=document.getElementById("cat");
           cat.classList.add("cat-bite");
           setTimeout(()=>{ cat.classList.remove("cat-bite"); },300);
-          // ✅ 不隱藏小魚，等待判斷答對再處理
-          setTimeout(()=>{ fishEl.style.transition="none"; fishEl.style.transform="scale(0.1)"; },800);
+          setTimeout(()=>{ fishEl.style.transition="none"; },800);
           break;
         }
       }
@@ -332,14 +331,18 @@
       let attempt=Array.from(slots).map(s=>s.innerText).join("");
       if (attempt.replace(/ /g,"").length===words[currentIndex].replace(/ /g,"").length){
         if (attempt===words[currentIndex]){
-          // ✅ 答對才真正吞掉小魚
+          // ✅ 答對
           speakWord(words[currentIndex]);
           slots.forEach(s=>s.classList.add("correct"));
           setTimeout(()=>{ slots.forEach(s=>s.classList.remove("correct")); },600);
           showMessage("答對了！","success");
           correctCount++;
-          // 隱藏魚
-          document.querySelectorAll("#letters .fish").forEach(f=>{ f.style.visibility="hidden"; });
+          // ✅ 答對才讓魚縮小隱藏
+          document.querySelectorAll("#letters .fish").forEach(f=>{
+            f.style.transition="transform 0.5s ease";
+            f.style.transform="scale(0.1)";
+            setTimeout(()=>{ f.style.visibility="hidden"; },500);
+          });
           setTimeout(()=>{ currentIndex++; loadWord(); },1500);
         } else {
           // ❌ 答錯
