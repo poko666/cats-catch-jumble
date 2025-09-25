@@ -278,7 +278,7 @@
           fishEl.style.top=fishY-fishRect.height/2+"px";
           fishEl.offsetHeight;
           fishEl.style.transition="transform 0.8s ease-in";
-          fishEl.style.transform=`translate(${dx}px, ${dy}px) scale(0.9)`; 
+          fishEl.style.transform=`translate(${dx}px, ${dy}px) scale(0.9)`; // 保持看得到
           let cat=document.getElementById("cat");
           cat.classList.add("cat-bite");
           setTimeout(()=>{ cat.classList.remove("cat-bite"); },300);
@@ -345,12 +345,12 @@
           });
           setTimeout(()=>{ currentIndex++; loadWord(); },1500);
         } else {
-          // ❌ 答錯 → 重新生成小魚
+          // ❌ 答錯
           slots.forEach(s=>s.classList.add("wrong"));
           setTimeout(()=>{ slots.forEach(s=>s.classList.remove("wrong")); },600);
           showMessage("答錯了，請再試一次！","error");
           fishEscape();
-          setTimeout(loadWord,1000); // ✅ 重新洗牌小魚
+          setTimeout(clearAnswer,1000);
         }
       }
     }
