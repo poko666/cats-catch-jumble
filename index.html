@@ -228,7 +228,6 @@
     }
 
     function loadWord(){
-      // ✅ 清掉舊的小魚和答案格，避免殘留
       document.getElementById("letters").innerHTML = "";
       document.getElementById("answer").innerHTML = "";
 
@@ -263,32 +262,51 @@
 
     function feedCat(letter,fishEl){
       let slots=document.querySelectorAll("#answer .slot");
-      for (let slot of slots){
-        if (slot.innerText===""){
-          slot.innerText=letter;
-          let mouth=document.getElementById("mouth");
-          let mouthRect=mouth.getBoundingClientRect();
-          let targetX=mouthRect.left+mouthRect.width/2;
-          let targetY=mouthRect.top+mouthRect.height/2;
-          let fishRect=fishEl.getBoundingClientRect();
-          let fishX=fishRect.left+fishRect.width/2;
-          let fishY=fishRect.top+fishRect.height/2;
-          let dx=targetX-fishX; let dy=targetY-fishY;
-          fishEl.style.zIndex="999"; fishEl.style.position="fixed";
-          fishEl.style.left=fishX-fishRect.width/2+"px";
-          fishEl.style.top=fishY-fishRect.height/2+"px";
-          fishEl.offsetHeight;
-          fishEl.style.transition="transform 0.8s ease-in";
-          fishEl.style.transform=`translate(${dx}px, ${dy}px) scale(0.9)`;
-          let cat=document.getElementById("cat");
-          cat.classList.add("cat-bite");
-          setTimeout(()=>{ cat.classList.remove("cat-bite"); },300);
-          // ✅ 動畫後復原 position，避免殘留
-          setTimeout(()=>{ fishEl.style.transition="none"; fishEl.style.position="relative"; },800);
-          break;
-        }
+      let targetWord = words[currentIndex];
+      let nextEmptyIndex = Array.from(slots).findIndex(s => s.innerText === "");
+      if (nextEmptyIndex === -1) return;
+
+      let expectedLetter = targetWord.replace(/ /g,"")[nextEmptyIndex];
+
+      if (letter === expectedLetter) {
+        // ✅ 答對 → 小魚游進嘴巴
+        slots[nextEmptyIndex].innerText = letter;
+
+        let mouth=document.getElementById("mouth");
+        let mouthRect=mouth.getBoundingClientRect();
+        let targetX=mouthRect.left+mouthRect.width/2;
+        let targetY=mouthRect.top+mouthRect.height/2;
+        let fishRect=fishEl.getBoundingClientRect();
+        let fishX=fishRect.left+fishRect.width/2;
+        let fishY=fishRect.top+fishRect.height/2;
+        let dx=targetX-fishX; let dy=targetY-fishY;
+
+        fishEl.style.zIndex="999"; fishEl.style.position="fixed";
+        fishEl.style.left=fishX-fishRect.width/2+"px";
+        fishEl.style.top=fishY-fishRect.height/2+"px";
+        fishEl.offsetHeight;
+        fishEl.style.transition="transform 0.8s ease-in";
+        fishEl.style.transform=`translate(${dx}px, ${dy}px) scale(0.9)`;
+
+        let cat=document.getElementById("cat");
+        cat.classList.add("cat-bite");
+        setTimeout(()=>{ cat.classList.remove("cat-bite"); },300);
+
+        setTimeout(()=>{ fishEl.style.transition="none"; fishEl.style.position="relative"; },800);
+      } else {
+        // ❌ 答錯 → 小魚跑走
+        fishRunAway(fishEl);
       }
+
       setTimeout(checkAnswer,200);
+    }
+
+    function fishRunAway(fishEl){
+      let dx=(Math.random()-0.5)*400;
+      let dy=(Math.random()-0.5)*200;
+      fishEl.style.transition="transform 0.6s ease";
+      fishEl.style.transform=`translate(${dx}px, ${dy}px)`;
+      setTimeout(()=>{ fishEl.style.transform="translate(0,0)"; },1000);
     }
 
     function speakWord(word){
@@ -300,19 +318,6 @@
       if (words.length>0 && currentIndex<words.length){
         speakWord(words[currentIndex]);
       }
-    }
-
-    function fishEscape(){
-      let fishes=document.querySelectorAll("#letters .fish");
-      fishes.forEach(fish=>{
-        if (fish.style.visibility!=="hidden"){
-          let dx=(Math.random()-0.5)*200;
-          let dy=(Math.random()-0.5)*200;
-          fish.style.transition="transform 0.3s ease";
-          fish.style.transform=`translate(${dx}px,${dy}px)`;
-          setTimeout(()=>{ fish.style.transform="translate(0,0)"; },300);
-        }
-      });
     }
 
     function checkAnswer(){
@@ -333,12 +338,10 @@
           });
           setTimeout(()=>{ currentIndex++; loadWord(); },1500);
         } else {
-          // ❌ 答錯 → 重新生成小魚
+          // ❌ 答錯 → 留在同一題
           slots.forEach(s=>s.classList.add("wrong"));
           setTimeout(()=>{ slots.forEach(s=>s.classList.remove("wrong")); },600);
           showMessage("答錯了，請再試一次！","error");
-          fishEscape();
-          setTimeout(()=>{ loadWord(); },1000);
         }
       }
     }
